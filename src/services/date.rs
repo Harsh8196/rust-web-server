@@ -8,8 +8,8 @@ use crate::routes::date::Date;
 use serde::Deserialize;
 use std::error::Error;
 use std::fs::File;
-use std::io::Read
-use std::io::BufReader<Result<std::fs::File, std::io::Error>>;
+use std::io::Read;
+use std::io::BufReader;
 use std::path::Path;
 use tfhe::{FheUint32, set_server_key, CompressedServerKey, CompactFheUint32};
 use std::str;
