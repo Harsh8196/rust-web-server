@@ -6,16 +6,58 @@ use rocket::serde::json::{Json};
 use crate::routes::date::Date;
 
 pub fn get_current_date() -> Date {
-    let current_utc = chrono::Utc::now();
-    let year = current_utc.year();
-    let month = current_utc.month();
-    let day = current_utc.day();
-    let current_date = Date {
-        day,
-        month,
-        year
-    };
-    current_date
+    #[derive(Deserialize, Debug)]
+        struct Fheid {
+            server_key: Vec<u8>,
+            birth_date: Vec<u8>,
+            today_date: u32
+        }
+
+        let file = File::open("/home/ubuntu/myapp/src/encryptData.json")?;
+        let reader = BufReader::new(file);
+
+        // Read the JSON contents of the file as an instance of `Fheid`.
+        let u: Fheid = serde_json::from_reader(reader).unwrap();
+
+        // Read the JSON encrypted data from the file
+        let server_key_bytes = u.server_key;
+        let birthday_bytes = u.birth_date;
+
+        //Deserialize the encrypted data
+        let compressed_sks: CompressedServerKey = bincode::deserialize(&server_key_bytes).unwrap();
+        let birthday: CompactFheUint32 = bincode::deserialize(&birthday_bytes).unwrap();
+        let today: u32 = u.today_date;
+
+        //Decompress and set server key for doing encrypted execution
+        let sks = compressed_sks.decompress();
+        set_server_key(sks);
+
+        //Convert CompactFheUint32 to FheUint32 for doing encrypted calculations
+        let birthday_fhe_uint32: FheUint32 = birthday.expand();
+        let diff = today - birthday_fhe_uint32.clone();
+
+        //Check if the person is an adult or not
+        let encrypted_diff = &diff.gt(180000u32);
+
+        //Serialize the result to return back to the client
+        let encrypted_res_bytes: Vec<u8> = bincode::serialize(&encrypted_diff).unwrap();
+
+        // Store encrypted result into the file 
+        let s =format!("{:?}", &encrypted_res_bytes.as_slice());
+        let string = String::from("./src/encrypted_res.txt");
+        let path = Path::new(&string);
+        fs::write(path, s).unwrap();
+
+        let current_utc = chrono::Utc::now();
+        let year = current_utc.year();
+        let month = current_utc.month();
+        let day = current_utc.day();
+        let current_date = Date {
+            day,
+            month,
+            year
+        };
+        current_date
 }
 
 pub fn date_plus_month(mut date: Json<Date>) -> Date {
