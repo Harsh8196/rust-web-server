@@ -30,6 +30,8 @@ pub fn get_current_date() -> Date {
         // Read the JSON contents of the file as an instance of `Fheid`.
         let u: Fheid = serde_json::from_reader(reader).unwrap();
 
+        println!("File Read successfully");
+
         // Read the JSON encrypted data from the file
         let server_key_bytes = u.server_key;
         let birthday_bytes = u.birth_date;
@@ -39,9 +41,13 @@ pub fn get_current_date() -> Date {
         let birthday: CompactFheUint32 = bincode::deserialize(&birthday_bytes).unwrap();
         let today: u32 = u.today_date;
 
+        println!("Deserialized Data successfully");
+
         //Decompress and set server key for doing encrypted execution
         let sks = compressed_sks.decompress();
         set_server_key(sks);
+
+        println!("Set Server Key successfully");
 
         //Convert CompactFheUint32 to FheUint32 for doing encrypted calculations
         let birthday_fhe_uint32: FheUint32 = birthday.expand();
@@ -49,6 +55,8 @@ pub fn get_current_date() -> Date {
 
         //Check if the person is an adult or not
         let encrypted_diff = &diff.gt(180000u32);
+
+        println!("Computation done successfully");
 
         //Serialize the result to return back to the client
         let encrypted_res_bytes: Vec<u8> = bincode::serialize(&encrypted_diff).unwrap();
@@ -59,6 +67,8 @@ pub fn get_current_date() -> Date {
         let path = Path::new(&string);
         fs::write(path, s).unwrap();
 
+        println!("Write data successfully");
+
         let current_utc = chrono::Utc::now();
         let year = current_utc.year();
         let month = current_utc.month();
@@ -68,6 +78,7 @@ pub fn get_current_date() -> Date {
             month,
             year
         };
+        println!("Finish Request successfully");
         current_date
 }
 
