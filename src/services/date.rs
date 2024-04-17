@@ -24,7 +24,7 @@ pub fn get_current_date() -> Date {
             today_date: u32
         }
 
-        let file = File::open("/home/ubuntu/myapp/src/encryptData.json");
+        let file = File::open("/home/ubuntu/myapp/src/encryptData.json").unwrap();
         let reader = BufReader::new(file);
 
         // Read the JSON contents of the file as an instance of `Fheid`.
