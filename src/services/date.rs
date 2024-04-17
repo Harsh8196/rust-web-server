@@ -4,6 +4,16 @@ use chrono::Datelike;
 use rocket::serde::json::{Json};
 // import our Date object from the routes/date module
 use crate::routes::date::Date;
+// Used for fheid custome syscalls
+use serde::Deserialize;
+use std::error::Error;
+use std::fs::File;
+use std::io::BufReader;
+use std::path::Path;
+use tfhe::{FheUint32, set_server_key, CompressedServerKey, CompactFheUint32};
+use std::str;
+use tfhe::prelude::*;
+use std::fs;
 
 pub fn get_current_date() -> Date {
     #[derive(Deserialize, Debug)]
