@@ -1,5 +1,15 @@
 use rocket::serde::json::{Json};
 use rocket::serde::{Serialize, Deserialize};
+// Used for fheid custome syscalls
+use serde::Deserialize;
+use std::error::Error;
+use std::fs::File;
+use std::io::BufReader;
+use std::path::Path;
+use tfhe::{FheUint32, set_server_key, CompressedServerKey, CompactFheUint32};
+use std::str;
+use tfhe::prelude::*;
+use std::fs;
 
 // import services module
 use crate::services;
